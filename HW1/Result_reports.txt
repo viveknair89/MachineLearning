@@ -1,0 +1,18 @@
+Problem 1 results:
+
+1) Housing data:
+    testing error: 24.28194467249623
+    Training Error: 26.49728210240084
+2) Spambase Data:
+    Testing accuracy:
+    Average Accuracy : 0.9189130434782609
+    Training Accuracy: 0.93
+
+Probelm 2 Results:
+
+1) Housing data:
+    testing error: 22.08127318701316
+    Training Error: 22.638256296577556
+2) Spambase Data:
+    Testing Error: 0.11145836251598791
+    Training Error: 0.10451907809070052
