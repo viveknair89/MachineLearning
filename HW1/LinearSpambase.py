@@ -6,23 +6,32 @@ from numpy.linalg import inv
 from sklearn import metrics
 import matplotlib.pyplot as plt
 
-def main():
+"""
+    This program implements Linear regression algorithm on Spambase Dataset
+"""
 
+def main():
+    threshold = 0.41
+    k_folds = 5
+    train_error = []
+    test_error = []
+    matches_test = []
+    matches_train = []
+
+    # Fetch Input data and preprocess it
     data= '/Users/viveknair/Desktop/ml/hw1/spambase.txt'
     listdata = get_data(data)
-    matches_test = []
-    matches_train=[]
+
     # number of features including label
     colcount = len(listdata[0])
 
     # Convert feature data to float
     for i in range(colcount):
         convert_to_float(listdata, i)
-    threshold =0.41
-    k_folds = 5
+
+    # Get Folds
     folds = get_folds(listdata, k_folds)
-    train_error = []
-    test_error = []
+
     # for fold in folds:
     fold=folds[3]
     train_data = list(folds)
@@ -63,7 +72,6 @@ def main():
 
     w = np.dot(x_transpose_x_inv, x_transpose_y)
 
-    mse_train, mse_test = 0.0, 0.0
     # Training error calculation
     predicted_y = np.dot(x, w)
     predicted = predicted_y.tolist()
@@ -78,7 +86,8 @@ def main():
     train_error.append(mse_train)
     print("training_error: ", mse_train)
     print("\n")
-    # Accuracy Measure
+
+    # Training Accuracy Measure
     match = 0
     modified_train = assign_labels(predicted, threshold)
     for i in range(len(actual)):
@@ -111,15 +120,16 @@ def main():
     accuracy = match / len(actual_test)
     matches_test.append(accuracy)
 
+    # Build Confusion Matrix
     confusion_matrix= create_confusion_mtrx(actual_test, modified_test)
     print(" Confusion Matrix: ", confusion_matrix)
 
-    # print(predicted_test_y)
     pred_list =[]
     for i in range(len(predicted_test)):
         pred_list.append(predicted_test[i][0])
     pred_test = np.array(pred_list)
 
+    # Calculate metrics , AUC and plot ROC
     fpr, tpr, thresholds = metrics.roc_curve(y2, pred_test)
     print("thresholds: ", thresholds)
     auc = metrics.auc(fpr, tpr)
@@ -137,12 +147,23 @@ def main():
 
 
 def error_avg(error):
+    """
+    Calculates Average Error
+    :param error: vector of errors
+    :return: Average Error
+    """
     sum=0.0
     for err in error:
         sum += err
     return sum/len(error)
 
 def plot_roc(fpr, tpr, auc):
+    """
+    Plot ROC Curve
+    :param fpr: False positive rate
+    :param tpr: true positive rate
+    :param auc: Area under the curve
+    """
     plt.title('ROC for Linear Regression')
     plt.plot(fpr, tpr, 'b', label='AUC = %0.2f' % auc)
     plt.legend(loc='lower right')
@@ -154,6 +175,11 @@ def plot_roc(fpr, tpr, auc):
     plt.show()
 
 def get_rates(matrix):
+    """
+    Calculate fpr, tpr
+    :param matrix: input confusion matrix
+    :return: FPR and TPR
+    """
     tp = matrix[0][0]
     fn = matrix[1][0]
     fp = matrix[0][1]
@@ -163,7 +189,15 @@ def get_rates(matrix):
     fpr = fp/(fp+tn)
 
     return tpr, fpr
+
+
 def assign_labels(predicted,threshold):
+    """
+    Assign labels according to threshold
+    :param predicted: predicted values vector
+    :param threshold: threshold value for deciding labels
+    :return: predicted labels vector
+    """
     mod_labels=[]
     for i in predicted:
         if float(i[0]) >= threshold:
@@ -171,8 +205,14 @@ def assign_labels(predicted,threshold):
         else:
             mod_labels.append(0.0)
     return mod_labels
-def get_data(filename):
 
+
+def get_data(filename):
+    """
+    Get Preprocessed data
+    :param filename: file name of input data
+    :return: processed data
+    """
     listdata = []
     with open(filename, "r") as file:
         data = file.readlines()
@@ -185,16 +225,32 @@ def get_data(filename):
 
 
 def get_data_without_labels(data):
+    """
+    Remove label column from the data
+    :param data: input data
+    :return: data without labels
+    """
     for dat in data:
         del dat[-1]
     return data
 
 def add_bias(data):
+    """
+    Add bias column to the data
+    :param data: input data
+    :return: data with added bias
+    """
     for i in range(len(data)):
         data[i] = [1] + data[i]
     return data
 
 def create_confusion_mtrx(actual, predicted):
+    """
+    Creates confusion matrix
+    :param actual: actual labels
+    :param predicted: predicted labels
+    :return: Confusion Matrix
+    """
     true_positive, true_negative, false_positive, false_negative = 0, 0, 0, 0
     conf_matrix=[]
     for i in range(len(actual)):
@@ -214,6 +270,12 @@ def create_confusion_mtrx(actual, predicted):
 
 
 def get_labels(data,colcount):
+    """
+    Returns labels (last column) from the given data
+    :param data: input dataset
+    :param colcount: column count
+    :return: list of labels extracted from input data
+    """
     labels=[]
     for datapoint in data:
         labels.append(datapoint[colcount-1])
@@ -221,11 +283,23 @@ def get_labels(data,colcount):
 
 
 def convert_to_float(data,feature):
+    """
+    Converts data to float
+    :param data: input data
+    :param feature: number of features
+    """
     for datapoint in data:
         datapoint[feature] = float(datapoint[feature])
 
 
 def get_normalized_data(minim, origdata, colcount):
+    """
+    Normalize the data
+    :param minim: vector with minimum values for each feature
+    :param origdata: input data
+    :param colcount: number of features/columns
+    :return: normalized data
+    """
     maxim =[]
     datcnt =0
     for dataset in origdata:
@@ -246,6 +320,12 @@ def get_normalized_data(minim, origdata, colcount):
 
 
 def get_folds(data, k):
+    """
+    Splits data into k folds
+     :param data: whole input data set
+     :param k: number of folds to be split into
+     :return: data divided randomly into k folds
+     """
     split_data = []
     fold_size = int(len(data) / k)
     for i in range(k):

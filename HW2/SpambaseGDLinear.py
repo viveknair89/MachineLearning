@@ -3,14 +3,23 @@ from random import randrange
 
 import numpy as np
 
-
+"""
+    This program implements Linear Regression algorithm using Gradient Descent on Spambase Dataset
+    with cross validation
+"""
 def main():
-
-    data= '/Users/viveknair/Desktop/ml/hw1/spambase.txt'
-    listdata = get_data(data)
-
+    # Initialize Iterations and learning rate
     epoch = 50
     lam = 0.0001
+
+    matches_test = []
+    matches_train = []
+    threshold = 0.44
+    k_folds = 5
+
+    # Fetch preprocessed data
+    data= '/Users/viveknair/Desktop/ml/hw1/spambase.txt'
+    listdata = get_data(data)
 
     # number of features including label
     colcount = len(listdata[0])
@@ -20,11 +29,7 @@ def main():
         convert_to_float(listdata, i)
 
     listdata = get_normalized_data(listdata, colcount)
-    matches_test = []
-    matches_train = []
-    threshold = 0.44
 
-    k_folds = 5
     folds = get_folds(listdata, k_folds)
 
     for fold in folds:
@@ -59,8 +64,8 @@ def main():
         w_hist = []
 
 
+        # Calculate Gradient
         for iter in range(epoch):
-
             prediction = np.dot(x, w)
             w = w - lam * np.dot(x.T, (prediction - y))
             w_hist.append(w)
@@ -80,7 +85,7 @@ def main():
         print("training_error: ", mse_train)
         tr_err_hist.append(mse_train)
         print("\n")
-        # Accuracy Measure
+        # Training Accuracy Measure
         match = 0
         modified_train = assign_labels(predicted, threshold)
         for i in range(len(actual)):
@@ -105,7 +110,7 @@ def main():
 
         print("test error: ", mse_test)
         test_err_hist.append(mse_test)
-        # Calc accuracy
+        # Calc Testing accuracy
         modified_test = assign_labels(predicted_test, threshold)
         match = 0
         for i in range(len(actual_test)):
@@ -122,10 +127,12 @@ def main():
     print("Average Accuracy in testing: ", error_avg(matches_test))
 
 
-
-
-
 def error_avg(error):
+    """
+    Calculates Average Error
+    :param error: vector of errors
+    :return: Average Error
+    """
     sum=0.0
     for err in error:
         sum += err
@@ -133,7 +140,11 @@ def error_avg(error):
 
 
 def get_data(filename):
-
+    """
+    Get Preprocessed data
+    :param filename: file name of input data
+    :return: processed data
+    """
     listdata = []
     with open(filename, "r") as file:
         data = file.readlines()
@@ -146,6 +157,12 @@ def get_data(filename):
 
 
 def assign_labels(predicted,threshold):
+    """
+    Assign labels according to threshold
+    :param predicted: predicted values vector
+    :param threshold: threshold value for deciding labels
+    :return: predicted labels vector
+    """
     mod_labels=[]
     for i in predicted:
         if float(i[0]) >= threshold:
@@ -156,17 +173,33 @@ def assign_labels(predicted,threshold):
 
 
 def get_data_without_labels(data):
+    """
+    remove labels from input data
+    :param data: input data
+    :return: Data without labels
+    """
     for dat in data:
         del dat[-1]
     return data
 
 def add_bias(data):
+    """
+    Adds bias column to data
+    :param data: Input data
+    :return: data with bias
+    """
     for i in range(len(data)):
         data[i] = [1] + data[i]
     return data
 
 
 def get_labels(data,colcount):
+    """
+    Returns labels (last column) from the given data
+    :param data: input dataset
+    :param colcount: column count
+    :return: list of labels extracted from input data
+    """
     labels=[]
     for datapoint in data:
         labels.append(datapoint[colcount-1])
@@ -174,11 +207,22 @@ def get_labels(data,colcount):
 
 
 def convert_to_float(data,feature):
+    """
+    Converts data to float
+    :param data: input data
+    :param feature: number of features
+    """
     for datapoint in data:
         datapoint[feature] = float(datapoint[feature])
 
 
 def get_normalized_data(origdata, colcount):
+    """
+    Normalize the data
+    :param origdata: input data
+    :param colcount: number of features/columns
+    :return: normalized data
+    """
     minim = []
     # Get minimum value for each feature for normalization
     for col in range(colcount - 1):
@@ -210,6 +254,12 @@ def get_normalized_data(origdata, colcount):
 
 
 def get_folds(data, k):
+    """
+    Split data into k folds
+    :param data: whole input data set
+    :param k: number of folds to be split into
+    :return: data divided randomly into k folds
+    """
     split_data = []
     fold_size = int(len(data) / k)
     for i in range(k):

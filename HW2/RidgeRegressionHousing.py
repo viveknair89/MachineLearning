@@ -1,11 +1,14 @@
 import math
-
 import numpy as np
 from numpy.linalg import inv
 
+"""
+    This program implements Ridge Regression algorithm on Housing Data
+"""
 
 def main():
 
+    # Fetch preprocessed training and test data
     train_data= '/Users/viveknair/Desktop/ml/hw1/housing_train.txt'
     listdata = get_data(train_data)
     test_data = '/Users/viveknair/Desktop/ml/hw1/housing_test.txt'
@@ -29,6 +32,7 @@ def main():
     for test in testdata:
         del test[-1]
 
+    # Get normalized data
     listdata, testdata = get_normalized_data(listdata, testdata, colcount)
 
     x = np.array(listdata)
@@ -89,7 +93,11 @@ def main():
 
 
 def get_data(filename):
-
+    """
+    Get Preprocessed data
+    :param filename: file name of input data
+    :return: processed data
+    """
     listdata =[]
     with open(filename, 'r') as file:
         data = file.readlines()
@@ -101,13 +109,13 @@ def get_data(filename):
     return listdata
 
 
-def add_bias(data):
-    for i in range(len(data)):
-        data[i] = [1] + data[i]
-    return data
-
-
 def get_labels(data,colcount):
+    """
+    Returns labels (last column) from the given data
+    :param data: input dataset
+    :param colcount: column count
+    :return: list of labels extracted from input data
+    """
     labels=[]
     for datapoint in data:
         labels.append(datapoint[colcount-1])
@@ -115,11 +123,23 @@ def get_labels(data,colcount):
 
 
 def convert_to_float(data,feature):
+    """
+    Converts data to float
+    :param data: input data
+    :param feature: number of features
+    """
     for datapoint in data:
         datapoint[feature] = float(datapoint[feature])
 
 
 def get_normalized_data(origdata, test, colcount):
+    """
+    Normalize the data
+    :param test: test data
+    :param origdata: input train data
+    :param colcount: number of features/columns
+    :return: normalized data(train and test data)
+    """
     datacount = len(origdata)
     mean=[]
     combineddata = origdata + test
@@ -134,20 +154,6 @@ def get_normalized_data(origdata, test, colcount):
             data[ind] = data[ind] - mean[ind]
 
     return combineddata[:datacount], combineddata[datacount:]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':

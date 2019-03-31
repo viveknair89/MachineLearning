@@ -3,9 +3,12 @@ import math
 import numpy as np
 from numpy.linalg import inv
 
-
+"""
+    This program implements Linear Regression algorithm on Housing Data
+"""
 def main():
 
+    # Fetch train and test data and preprocess it
     train_data= '/Users/viveknair/Desktop/ml/hw1/housing_train.txt'
     listdata = get_data(train_data)
     test_data = '/Users/viveknair/Desktop/ml/hw1/housing_test.txt'
@@ -82,7 +85,11 @@ def main():
 
 
 def get_data(filename):
-
+    """
+    Get Preprocessed data
+    :param filename: file name of input data
+    :return: processed data
+    """
     listdata =[]
     with open(filename, 'r') as file:
         data = file.readlines()
@@ -95,12 +102,23 @@ def get_data(filename):
 
 
 def add_bias(data):
+    """
+    Adds bias column to data
+    :param data: Input data
+    :return: data with bias
+    """
     for i in range(len(data)):
         data[i] = [1] + data[i]
     return data
 
 
 def get_labels(data,colcount):
+    """
+    Returns labels (last column) from the given data
+    :param data: input dataset
+    :param colcount: column count
+    :return: list of labels extracted from input data
+    """
     labels=[]
     for datapoint in data:
         labels.append(datapoint[colcount-1])
@@ -108,31 +126,13 @@ def get_labels(data,colcount):
 
 
 def convert_to_float(data,feature):
+    """
+    Converts data to float
+    :param data: input data
+    :param feature: number of features
+    """
     for datapoint in data:
         datapoint[feature] = float(datapoint[feature])
-
-
-def get_normalized_data(minim, origdata, colcount):
-    maxim =[]
-    datcnt =0
-    for dataset in origdata:
-        datcnt += 1
-        for ind in range(colcount-1):
-            dataset[ind]= dataset[ind]-minim[ind]
-            if datcnt == 1:
-                maxim.append(dataset[ind])
-            else:
-                if dataset[ind] > maxim[ind]:
-                    maxim[ind] = dataset[ind]
-
-    for datapoint in origdata:
-        for ind in range(colcount-1):
-            datapoint[ind] = datapoint[ind]/maxim[ind]
-
-    return origdata
-
-
-
 
 
 if __name__ == '__main__':

@@ -2,9 +2,17 @@ from decimal import Decimal
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.ops import variable_scope as vs
+
+"""
+    This program implements a multi-class supervised Neural Network using likelihod objective with cross entropy for loss
+    function, softmax activation for output layer and sigmoid activation for hidden layer using TensorFlow library
+"""
+
 
 class multinn():
+    """
+    This is a multiclass neural network
+    """
     def __init__(self):
         self.learnrate =0.1
         self.hidden_units = 13
@@ -31,16 +39,24 @@ class multinn():
         self.optimizer = tf.train.AdamOptimizer(self.learnrate, name="AdamOptimizer").minimize(self.loss)
 
     def update(self, x, y):
+        """
+        Optimizes weights each iteration
+        :param x: a datapoint
+        :param y: a data label
+        :return: returns loss and output result values after optimization
+        """
         sess = tf.get_default_session()
-        # hidden = sess.run([self.hidden_w], feed_dict = {self.X:[x]})
-        # bias = sess.run([self.hidden_bias])
-        # print(np.add(np.dot([x], hidden), bias))
-        # print(sess.run([self.hidden], feed_dict={self.X: [x]}))
         _, l, out = sess.run([self.optimizer, self.loss, self.output], feed_dict={self.X: [x], self.Y: [y]})
         # print(l)
         return l, out
 
     def get_prediction(self, x, y):
+        """
+        predicts output value of test dataset and calculates accuracy
+        :param x: test dataset
+        :param y: test label vector
+        :return: accuracy of prediction
+        """
         preds = []
         sess = tf.get_default_session()
         for i,j in zip(x, y):
@@ -49,6 +65,8 @@ class multinn():
         return np.mean(preds)
 
 def main(_):
+
+    # Fetch Preprocessed data
     train_dat, train_labels = read_data("train_wine.csv")
     test_dat, test_labels = read_data("test_wine.csv")
     train_x, test_x = get_normalized_data(train_dat+test_dat, len(train_dat[0]), len(train_dat))
@@ -61,6 +79,7 @@ def main(_):
         sess.run(init)
         for ind in range(50):
             acc=[]
+            # Train the model
             for x, y in zip(train_x, train_labels):
                 l, out = model.update(x, y)
                 accuracy = get_accuracy(out, y)
@@ -76,6 +95,11 @@ def main(_):
 
 
 def read_data(filename):
+    """
+    read data from file and preprocess it
+    :param filename: name of the input file
+    :return: processed data and labels
+    """
     data, labels = [], []
     m = {'1': [1.0, 0.0, 0.0], '2': [0.0, 1.0, 0.0], '3': [0.0, 0.0, 1.0]}
     with open(filename, "r") as file:
@@ -92,9 +116,12 @@ def read_data(filename):
 
 
 def get_accuracy(prediction, labels):
-    # print(np.argmax(prediction[0]), np.argmax(labels))
-    # print(prediction[0])
-    # print(labels)
+    """
+    Computes labels based on predicted values
+    :param prediction: predicted value
+    :param labels: actual labels
+    :return: predicted label for the dataset
+    """
     if np.argmax(prediction[0]) == np.argmax(labels):
         return 1
     else:
@@ -102,6 +129,13 @@ def get_accuracy(prediction, labels):
 
 
 def get_normalized_data(origdata, colcount, traincount):
+    """
+    Normalize the data
+    :param traincount: number of records in training dataset
+    :param origdata: input train data
+    :param colcount: number of features/columns
+    :return: normalized data(train and test data)
+    """
     minim =list(map(min, *origdata))
     datcnt = 0
     for dataset in origdata:

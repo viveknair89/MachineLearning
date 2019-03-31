@@ -1,11 +1,13 @@
-import math
-from random import randrange
+
 
 import numpy as np
 
-
+"""
+    This program implements the Single layered Perceptron algorithm 
+"""
 def main():
 
+    # Fetch Training and testing dataset
     data= '/Users/viveknair/Desktop/ml/hw1/perceptronData.txt'
     listdata = get_data(data)
 
@@ -48,6 +50,8 @@ def main():
 
     total_mistakes = len(traindata)
     iter = 0
+
+    # Train until we get perfect prediction
     while total_mistakes>0:
         iter+=1
         mistakes =0
@@ -57,11 +61,14 @@ def main():
         preds = np.dot(x,w)
         missclassified = []
         predicted =preds.tolist()
+
+        # All the labels having negative labels after training would be misclassified
         for ind in range(len(predicted)):
             if predicted[ind] < 0.0:
                 missclassified.append(traindata[ind])
                 mistakes+=1
         x = np.array(missclassified)
+
         total_mistakes= mistakes
         print("Iteration %d total mistakes: %d" % (iter, mistakes))
 
@@ -74,16 +81,12 @@ def main():
 
 
 
-
-def error_avg(error):
-    sum=0.0
-    for err in error:
-        sum += err
-    return sum/len(error)
-
-
 def get_data(filename):
-
+    """
+    Get Preprocessed data
+    :param filename: file name of input data
+    :return: processed data
+    """
     listdata = []
     with open(filename, "r") as file:
         data = file.readlines()
@@ -96,12 +99,23 @@ def get_data(filename):
 
 
 def add_bias(data):
+    """
+    Adds bias column to data
+    :param data: Input data
+    :return: data with bias
+    """
     for i in range(len(data)):
         data[i] = [1] + data[i]
     return data
 
 
 def get_labels(data,colcount):
+    """
+    Returns labels (last column) from the given data
+    :param data: input dataset
+    :param colcount: column count
+    :return: list of labels extracted from input data
+    """
     labels=[]
     for datapoint in data:
         labels.append(datapoint[colcount-1])
@@ -109,42 +123,13 @@ def get_labels(data,colcount):
 
 
 def convert_to_float(data,feature):
+    """
+    Converts data to float
+    :param data: input data
+    :param feature: number of features
+    """
     for datapoint in data:
         datapoint[feature] = float(datapoint[feature])
-
-
-def get_normalized_data(origdata, colcount):
-    minim=[]
-    # Get minimum value for each feature for normalization
-    for col in range(colcount-1):
-        ind=0
-        for datapoint in origdata:
-            ind += 1
-            if ind == 1:
-                minim.append(datapoint[col])
-            else:
-                if datapoint[col] < minim[col]:
-                    minim[col] = datapoint[col]
-    maxim =[]
-    datcnt =0
-    for dataset in origdata:
-        datcnt += 1
-        for ind in range(colcount-1):
-            dataset[ind]= dataset[ind]-minim[ind]
-            if datcnt == 1:
-                maxim.append(dataset[ind])
-            else:
-                if dataset[ind] > maxim[ind]:
-                    maxim[ind] = dataset[ind]
-
-    for datapoint in origdata:
-        for ind in range(colcount-1):
-            datapoint[ind] = datapoint[ind]/maxim[ind]
-
-    return origdata
-
-
-
 
 
 if __name__ == '__main__':

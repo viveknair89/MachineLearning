@@ -4,12 +4,22 @@ from random import randrange
 import numpy as np
 from numpy.linalg import inv
 
-
+"""
+    This program implements Ridge Regression algorithm on Spambase dataset
+"""
 def main():
 
+    alpha =3
+    k_folds = 5
+    train_error = []
+    test_error = []
+    matches_test = []
+    matches_train = []
+    threshold = 0.45
+
+    # Fetch preprocessed Data
     data= '/Users/viveknair/Desktop/ml/hw1/spambase.txt'
     listdata = get_data(data)
-    alpha =3
 
     # number of features including label
     colcount = len(listdata[0])
@@ -18,13 +28,9 @@ def main():
     for i in range(colcount):
         convert_to_float(listdata, i)
 
-    k_folds = 5
+    # Get k folded data
     folds = get_folds(listdata, k_folds)
-    train_error = []
-    test_error = []
-    matches_test = []
-    matches_train = []
-    threshold = 0.45
+
     for fold in folds:
         train_data = list(folds)
         train_data.remove(fold)
@@ -56,10 +62,7 @@ def main():
 
         identity = np.identity(colcount-1)
         alpha_identity = np.dot(alpha, identity)
-        print(alpha_identity.shape)
         x_transpose_x_alpha_id = np.add(x_transpose_x, alpha_identity)
-
-        # x_transpose_x_inv = inv(x_transpose_x)
 
         invfn = inv(x_transpose_x_alpha_id)
 
@@ -73,7 +76,6 @@ def main():
 
         w = np.dot(invfn, x_transpose_y)
 
-        mse_train, mse_test = 0.0, 0.0
         # Training error calculation
         predicted_y = np.dot(x, w)
         predicted = predicted_y.tolist()
@@ -88,7 +90,7 @@ def main():
         train_error.append(mse_train)
         print("training_error: ", mse_train)
         print("\n")
-        # Accuracy Measure
+        # Training Accuracy Measure
         match = 0
         modified_train = assign_labels(predicted, threshold)
         for i in range(len(actual)):
@@ -111,7 +113,7 @@ def main():
         test_error.append(mse_test)
         print("test error: ", mse_test)
         print("\n")
-        # Calc accuracy
+        # Calc Testing accuracy
         modified_test = assign_labels(predicted_test, threshold)
         match = 0
         for i in range(len(actual_test)):
@@ -132,6 +134,11 @@ def main():
 
 
 def error_avg(error):
+    """
+    Calculates Average Error
+    :param error: vector of errors
+    :return: Average Error
+    """
     sum=0.0
     for err in error:
         sum += err
@@ -139,7 +146,11 @@ def error_avg(error):
 
 
 def get_data(filename):
-
+    """
+    Get Preprocessed data
+    :param filename: file name of input data
+    :return: processed data
+    """
     listdata = []
     with open(filename, "r") as file:
         data = file.readlines()
@@ -152,6 +163,12 @@ def get_data(filename):
 
 
 def assign_labels(predicted,threshold):
+    """
+    Assign labels according to threshold
+    :param predicted: predicted values vector
+    :param threshold: threshold value for deciding labels
+    :return: predicted labels vector
+    """
     mod_labels=[]
     for i in predicted:
         if float(i[0]) >= threshold:
@@ -162,17 +179,33 @@ def assign_labels(predicted,threshold):
 
 
 def get_data_without_labels(data):
+    """
+    Get labels removed from the input Data
+    :param data: input data
+    :return: data without labels
+    """
     for dat in data:
         del dat[-1]
     return data
 
 def add_bias(data):
+    """
+    Adds bias column to data
+    :param data: Input data
+    :return: data with bias
+    """
     for i in range(len(data)):
         data[i] = [1] + data[i]
     return data
 
 
 def get_labels(data,colcount):
+    """
+    Returns labels (last column) from the given data
+    :param data: input dataset
+    :param colcount: column count
+    :return: list of labels extracted from input data
+    """
     labels=[]
     for datapoint in data:
         labels.append(datapoint[colcount-1])
@@ -180,31 +213,22 @@ def get_labels(data,colcount):
 
 
 def convert_to_float(data,feature):
+    """
+    Converts data to float
+    :param data: input data
+    :param feature: number of features
+    """
     for datapoint in data:
         datapoint[feature] = float(datapoint[feature])
 
 
-def get_normalized_data(minim, origdata, colcount):
-    maxim =[]
-    datcnt =0
-    for dataset in origdata:
-        datcnt += 1
-        for ind in range(colcount-1):
-            dataset[ind]= dataset[ind]-minim[ind]
-            if datcnt == 1:
-                maxim.append(dataset[ind])
-            else:
-                if dataset[ind] > maxim[ind]:
-                    maxim[ind] = dataset[ind]
-
-    for datapoint in origdata:
-        for ind in range(colcount-1):
-            datapoint[ind] = datapoint[ind]/maxim[ind]
-
-    return origdata
-
-
 def get_folds(data, k):
+    """
+    Split data into k folds
+     :param data: whole input data set
+     :param k: number of folds to be split into
+     :return: data divided randomly into k folds
+     """
     split_data = []
     fold_size = int(len(data) / k)
     for i in range(k):
@@ -217,6 +241,13 @@ def get_folds(data, k):
 
 
 def get_normalized_data(origdata, test, colcount):
+    """
+    Normalize the data
+    :param test: test data
+    :param origdata: input train data
+    :param colcount: number of features/columns
+    :return: normalized data(train and test data)
+    """
     datacount = len(origdata)
     mean=[]
     combineddata = origdata + test
